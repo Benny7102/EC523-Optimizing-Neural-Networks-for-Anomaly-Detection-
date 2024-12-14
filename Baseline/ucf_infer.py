@@ -11,6 +11,15 @@ from dataset_loader import data
 from sklearn.metrics import precision_recall_curve, roc_curve,auc
 
 import time
+import torch.quantization
+
+#dynamic quantization to the model weights
+def wq(model):
+    # iterate through all layers and apply quantization 
+    for i , module in model.named_modules():
+        if isinstance(module, torch.nn.Linear) or isinstance(module, torch.nn.Conv1d):
+            torch.quantization.quantize_dynamic(module, dtype=torch.qint8) # 8 -bit quantization use .qint16 for 16 bit 
+    return model
 
 def valid(net, config, test_loader, model_file=None):
     with torch.no_grad():
@@ -132,6 +141,10 @@ if __name__ == "__main__":
         worker_init_fn = np.random.seed(config.seed)
     net = WSAD(input_size = config.len_feature, flag = "Test", a_nums = 60, n_nums = 60)
     net = net.cuda()
+
+    #quantize model
+    net = wq(net)
+
     test_loader = data.DataLoader(
         UCF_crime(root_dir = config.root_dir, mode = 'Test', modal = config.modal, num_segments = config.num_segments, len_feature = config.len_feature),
             batch_size = 1,
