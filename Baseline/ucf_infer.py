@@ -16,10 +16,8 @@ import torch.quantization
 #dynamic quantization to the model weights
 def wq(model):
     # iterate through all layers and apply quantization 
-    for i , module in model.named_modules():
-        if isinstance(module, torch.nn.Linear) or isinstance(module, torch.nn.Conv1d):
-            torch.quantization.quantize_dynamic(module, dtype=torch.qint8) # 8 -bit quantization use .qint16 for 16 bit 
-    return model
+    M = torch.quantization.quantize_dynamic(model,{torch.nn.Linear, torch.nn.Conv1d}, dtype=torch.qint8) # 8 -bit quantization use .qint16 for 16 bit 
+    return M
 
 def valid(net, config, test_loader, model_file=None):
     with torch.no_grad():
