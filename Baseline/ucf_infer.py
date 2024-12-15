@@ -19,6 +19,17 @@ def wq(model):
     M = torch.quantization.quantize_dynamic(model,{torch.nn.Linear, torch.nn.Conv1d}, dtype=torch.qint8) # 8 -bit quantization use .qint16 for 16 bit 
     return M
 
+#Weights and Activation Quantization 
+def WAQ(model):
+    #set Configuration 
+    model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
+    #fuse layers in the model
+    model = torch.quantization.fuse_modules(model, [['conv', 'relu'], ['fc', 'relu']])
+    #quantized
+    model = torch.quantization.prepare(model)
+    model = torch.quantization.convert(model)
+    return model
+
 def valid(net, config, test_loader, model_file=None):
     with torch.no_grad():
         net.eval()
@@ -140,9 +151,12 @@ if __name__ == "__main__":
     net = WSAD(input_size = config.len_feature, flag = "Test", a_nums = 60, n_nums = 60)
     net = net.cuda()
 
-    #quantize model
+    #quantize weight model
     net = wq(net)
 
+    #quantize weight + activation model
+    # net = waq(net)
+    
     test_loader = data.DataLoader(
         UCF_crime(root_dir = config.root_dir, mode = 'Test', modal = config.modal, num_segments = config.num_segments, len_feature = config.len_feature),
             batch_size = 1,
