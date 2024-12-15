@@ -20,11 +20,11 @@ def wq(model):
     return M
 
 #Weights and Activation Quantization 
-def WAQ(model):
+def waq(model):
     #set Configuration 
     model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
     #fuse layers in the model
-    model = torch.quantization.fuse_modules(model, [['conv', 'relu'], ['fc', 'relu']])
+    model = torch.quantization.fuse_modules(model, [['conv1d', 'relu'], ['fc', 'relu']])
     #quantized
     model = torch.quantization.prepare(model)
     model = torch.quantization.convert(model)
