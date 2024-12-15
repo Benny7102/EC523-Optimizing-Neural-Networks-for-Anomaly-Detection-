@@ -75,8 +75,8 @@ def valid(net, config, test_loader, model_file=None):
             _data, _label, _name = next(load_iter)
             _name = _name[0]
 
-            # Move data to GPU and convert to half
-            _data = _data.to(device).half()
+            # Move data to GPU and convert to INT8
+            _data = _data.to(device).to(torch.int8)
             _label = _label.to(device)  # Label can stay int64, no need to half
 
             start_time = time.time()
@@ -116,6 +116,7 @@ def valid(net, config, test_loader, model_file=None):
                 # Reset temp_predict
                 temp_predict = torch.zeros((0), dtype=torch.int8, device=device)
 
+        # Calculate resulting average inference time:
         average_inference_time = total_inference_time / inference_count
         print("average inference time (ms): ", average_inference_time * 1000)
 
