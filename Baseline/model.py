@@ -19,12 +19,14 @@ class Temporal(Module):
         x = x.permute(0, 2, 1)
         return x
 
+
 class ADCLS_head(Module):
     def __init__(self, in_dim, out_dim):
         super().__init__()
         self.mlp = nn.Sequential(nn.Linear(in_dim,128), nn.ReLU(), nn.Linear(128,out_dim), nn.Sigmoid())
     def forward(self, x):
         return self.mlp(x)
+
 
 class WSAD(Module):
     def __init__(self, input_size, flag, a_nums, n_nums):
@@ -42,6 +44,7 @@ class WSAD(Module):
         self.encoder_mu = nn.Sequential(nn.Linear(512, 512))
         self.encoder_var = nn.Sequential(nn.Linear(512, 512))
         self.relu = nn.ReLU()
+
     def _reparameterize(self, mu, logvar):
         std = torch.exp(logvar).sqrt()
         epsilon = torch.randn_like(std)
