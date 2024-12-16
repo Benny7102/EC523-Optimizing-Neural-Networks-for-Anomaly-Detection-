@@ -21,11 +21,7 @@ def valid(net, config, test_loader, model_file=None):
         net.half()  # Convert model weights to half precision (FP16)
 
         if model_file is not None:
-            # Load weights onto GPU
             state_dict = torch.load(model_file, map_location='cuda')
-            # The weights will be loaded as float32 by default, but since net is now half,
-            # future computations will be in half. You can convert state_dict parameters to half if needed.
-            # Usually, PyTorch will handle conversions at runtime, but let's do it explicitly:
             for k,v in state_dict.items():
                 if v.dtype == torch.float32:
                     state_dict[k] = v.half()
@@ -59,12 +55,11 @@ def valid(net, config, test_loader, model_file=None):
             _data, _label, _name = next(load_iter)
             _name = _name[0]
 
-            # Move data to GPU and convert to half
             _data = _data.to(device).half()
-            _label = _label.to(device)  # Label can stay int64, no need to half
+            _label = _label.to(device)  
 
             start_time = time.time()
-            # Forward pass in FP16 on GPU
+
             res = net(_data)
             end_time = time.time()
 
@@ -72,12 +67,11 @@ def valid(net, config, test_loader, model_file=None):
             total_inference_time += inference_time
             inference_count += 1
 
-            a_predict = res["frame"]  # FP16 on GPU
+            a_predict = res["frame"]  
             temp_predict = torch.cat([temp_predict, a_predict], dim=0)
 
             if (i + 1) % 10 == 0:
                 cls_label.append(int(_label))
-                # Convert predictions back to float32 on CPU for further processing
                 a_predict_cpu = temp_predict.mean(0).float().cpu().numpy()
                 pl = len(a_predict_cpu) * 16
 
@@ -97,7 +91,6 @@ def valid(net, config, test_loader, model_file=None):
                 else:
                     frame_predict = np.concatenate([frame_predict, fpre_])
 
-                # Reset temp_predict
                 temp_predict = torch.zeros((0), dtype=torch.float16, device=device)
 
         average_inference_time = total_inference_time / inference_count
