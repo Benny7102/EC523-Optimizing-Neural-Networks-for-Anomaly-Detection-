@@ -18,7 +18,6 @@ def valid(net, config, test_loader, model_file=None):
 
         device = torch.device('cuda')
         net.to(device)
-        net.half()  # Convert model weights to half precision (FP16)
 
         if model_file is not None:
             state_dict = torch.load(model_file, map_location='cuda')
