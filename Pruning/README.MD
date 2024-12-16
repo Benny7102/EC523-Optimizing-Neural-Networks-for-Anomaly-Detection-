@@ -1,4 +1,4 @@
-# UR-DMU Model Inference
+# Pruned UR-DMU Model Inference
 
 This repository contains pretrained UR-DMU models with varying levels of sparsity (70%, 80%, 90%, 95%, and 99%) for inference tasks. Follow the instructions below to set up and run the inference script.
 
