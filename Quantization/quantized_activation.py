@@ -19,7 +19,7 @@ def valid(net, config, test_loader, model_file=None):
         device = torch.device('cuda')
         net.to(device)
 
-        dataset_obj = UCF_crime()
+        load_iter = iter(test_loader)
 
         # === Apply static quantization to quantize the activation layer ===
         
@@ -36,7 +36,9 @@ def valid(net, config, test_loader, model_file=None):
         net_prepared = torch.ao.quantization.prepare(net_fused)
 
         # Calibrate the prepared model to determine quantization parameters for activations
-        x = dataset_obj[0] # Get single datapoint
+        x, _, _ = next(load_iter)
+        # Move data to GPU and convert to INT8
+        x = x.to(device).to(torch.int8) # Get single datapoint
         net_prepared(x) # Feed datapoint into network with observers
 
         # Convert the observed model to a quantized model
@@ -79,6 +81,7 @@ def valid(net, config, test_loader, model_file=None):
             _data = _data.to(device).to(torch.int8)
             _label = _label.to(device)  # Label can stay int64, no need to half
 
+            # Measure the execution time of the forward pass
             start_time = time.time()
             # Forward pass in INT8 on GPU
             res = net(_data)
