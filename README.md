@@ -40,8 +40,8 @@ We aim to enhance the BN-WVAD model through two main optimization approaches:
 ## Team
 
 - **Pruning Implementation**
-  - Jimmy
-  - Jason
+  - Jimmy (Jialin Sui)
+  - Jason Li
 
 - **Quantization Implementation**
   - Benny Li
